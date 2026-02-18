@@ -1,0 +1,47 @@
+
+        body { font-family: 'Noto Sans Myanmar', sans-serif; background-color: #F1F5F9; }
+        
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        
+        /* Tree Structure CSS */
+        .tree-container { display: flex; justify-content: center; padding-bottom: 80px; transform-origin: top center; transition: transform 0.3s ease; }
+        .tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
+        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
+        
+        /* Connectors */
+        .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; }
+        .tree li::after { right: auto; left: 50%; border-left: 1px solid #64748b; }
+        .tree li:only-child::after, .tree li:only-child::before { display: none; }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+        .tree li:last-child::before { border-right: 1px solid #64748b; border-radius: 0 5px 0 0; }
+        .tree li:first-child::after { border-radius: 5px 0 0 0; }
+        .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 1px solid #64748b; width: 0; height: 20px; }
+        
+        /* Employee Node Card */
+        .tree-node { 
+            border: 1px solid #cbd5e1; padding: 10px; display: inline-block; 
+            border-radius: 12px; background: white; transition: all 0.3s; 
+            min-width: 160px; position: relative; z-index: 1; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+        }
+        .tree-node:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 50; border-color: #3b82f6; }
+        
+        /* Node Types */
+        .tree-node.company { background: #1e293b; color: white; border: none; font-size: 14px; font-weight: bold; }
+        .tree-node.dept { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: bold; }
+        
+        /* Rank Colors (High Num = High Rank) */
+        .rank-high { background: #eff6ff; border-left: 4px solid #3b82f6; } /* Rank 8-10 (Manager) */
+        .rank-med { background: #f5f3ff; border-left: 4px solid #8b5cf6; } /* Rank 5-7 (Supervisor) */
+        .rank-low { border-left: 4px solid #cbd5e1; } /* Rank 1-4 (Staff) */
+        
+        /* Hover Actions */
+        .node-actions { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #334155; padding: 4px; border-radius: 6px; gap: 4px; z-index: 100; margin-top: 5px; }
+        .tree-node:hover .node-actions { display: flex; }
+        
+        #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
+        
+        
