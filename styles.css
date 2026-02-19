@@ -1,370 +1,46 @@
-// 1. Supabase Configuration
-// ==========================================
-const SUPABASE_URL = 'https://fjrllvtkbehysuhapnob.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqcmxsdnRrYmVoeXN1aGFwbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODI1OTcsImV4cCI6MjA4Njc1ODU5N30.GcrORx1vnZ4BAm6ZSjxyFtvBeOZGDLofORMz-VnG55k'; 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// 2. AUTH Logic (Login & Permissions)
-// ==========================================
-const auth = {
-    currentUser: null,
-    init() {
-        const session = sessionStorage.getItem('user_session');
-        if (session) {
-            this.currentUser = JSON.parse(session);
-            this.applyRole();
-            app.init();
-        } else {
-            document.getElementById('login-overlay').classList.remove('hidden');
-        }
-    },
-    login(e) {
-        e.preventDefault();
-        const u = document.getElementById('login-user').value.toLowerCase();
-        const p = document.getElementById('login-pass').value;
-        // Password စစ်ဆေးခြင်း
-        if ((u === 'admin' && p === '1234') || (u === 'guest' && p === '1care@2025')) {
-            this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
-        } else {
-            alert('Invalid Login!');
-        }
-    },
-    setSession(user) {
-        this.currentUser = user;
-        sessionStorage.setItem('user_session', JSON.stringify(user));
-        document.getElementById('login-overlay').classList.add('hidden');
-        this.applyRole();
-        app.init();
-    },
-    logout() { 
-        sessionStorage.removeItem('user_session'); 
-        location.reload(); 
-    },
-    applyRole() {
-        const isAdmin = this.currentUser.role === 'admin';
-        document.getElementById('user-role-badge').textContent = isAdmin ? 'Admin' : 'Viewer';
-        // Admin သာ မြင်ရမည့် ခလုတ်များကို ထိန်းချုပ်ခြင်း
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
-    }
-};
-
-// 3. Database Operations
-// ==========================================
-const db = {
-    async getAll() {
-        const { data, error } = await sb.from('employees').select('*');
-        if (error) { console.error("DB Error:", error); return []; }
-        return data;
-    },
-    async add(emp) {
-        const { error } = await sb.from('employees').insert([emp]);
-        return !error;
-    },
-    async update(id, emp) {
-        const { error } = await sb.from('employees').update(emp).eq('id', id);
-        return !error;
-    },
-    async delete(id) {
-        const { error } = await sb.from('employees').delete().eq('id', id);
-        return !error;
-    }
-};
-
-// 4. Chart Zoom Controls
-// ==========================================
-const chart = {
-    scale: 1,
-    zoom(delta) {
-        this.scale = Math.max(0.3, Math.min(2, this.scale + delta));
-        document.getElementById('org-tree-root').style.transform = `scale(${this.scale})`;
-    },
-    reset() { 
-        this.scale = 1; 
-        document.getElementById('org-tree-root').style.transform = `scale(1)`; 
-    }
-};
-
-// 5. Main App Logic
-// ==========================================
-const app = {
-    data: [],
-    state: { view: 'list', dept: 'All', search: '' },
-
-    async init() {
-        this.toggleLoading(true);
-        this.data = await db.getAll();
-        this.toggleLoading(false);
-        this.renderSidebar();
-        this.renderList();
-        this.renderChart();
+ body { font-family: 'Noto Sans Myanmar', sans-serif; background-color: #F1F5F9; }
         
-        // Search Input Listener
-        document.getElementById('search-input').oninput = (e) => {
-            this.state.search = e.target.value.toLowerCase();
-            this.renderList();
-        };
-    },
-
-    toggleLoading(show) {
-        const loader = document.getElementById('loading-overlay');
-        if(loader) {
-            loader.classList.toggle('hidden', !show);
-            loader.classList.toggle('flex', show);
-        }
-    },
-
-    switchView(view) {
-        this.state.view = view;
-        document.getElementById('view-list').classList.toggle('hidden', view !== 'list');
-        document.getElementById('view-chart').classList.toggle('hidden', view !== 'chart');
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         
-        const btnList = document.getElementById('btn-list');
-        const btnChart = document.getElementById('btn-chart');
-
-        if(view === 'list') {
-            btnList.classList.add('bg-white', 'text-indigo-600', 'shadow');
-            btnChart.classList.remove('bg-white', 'text-indigo-600', 'shadow');
-        } else {
-            btnChart.classList.add('bg-white', 'text-indigo-600', 'shadow');
-            btnList.classList.remove('bg-white', 'text-indigo-600', 'shadow');
-            this.renderChart();
-        }
-    },
-
-    // --- Sidebar & Filtering ---
-    renderSidebar() {
-        const depts = {};
-        this.data.forEach(e => depts[e.dept] = (depts[e.dept] || 0) + 1);
-        const sidebar = document.getElementById('dept-sidebar');
-        if(!sidebar) return;
-
-        sidebar.innerHTML = `<button onclick="app.filterDept('All')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm font-bold flex justify-between ${this.state.dept==='All' ? 'bg-indigo-50 text-indigo-700':'text-slate-600 hover:bg-slate-100'}">All Depts <span>${this.data.length}</span></button>`;
+        /* Tree Structure CSS */
+        .tree-container { display: flex; justify-content: center; padding-bottom: 80px; transform-origin: top center; transition: transform 0.3s ease; }
+        .tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
+        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
         
-        Object.entries(depts).sort((a,b)=>b[1]-a[1]).forEach(([d, c]) => {
-            sidebar.innerHTML += `<button onclick="app.filterDept('${d}')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm flex justify-between ${this.state.dept===d ? 'bg-indigo-50 text-indigo-700 font-bold':'text-slate-600 hover:bg-slate-100'}"><span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs">${c}</span></button>`;
-        });
-        document.getElementById('total-count').innerText = this.data.length;
-    },
-
-    filterDept(d) {
-        this.state.dept = d;
-        this.renderSidebar();
-        this.renderList();
-        this.renderChart();
-    },
-
-    // --- List View ---
-    renderList() {
-        const grid = document.getElementById('employee-grid');
-        if(!grid) return;
-        grid.innerHTML = '';
-        const filtered = this.data.filter(e => {
-            const matchDept = this.state.dept === 'All' || e.dept === this.state.dept;
-            const matchSearch = e.name.toLowerCase().includes(this.state.search);
-            return matchDept && matchSearch;
-        });
-
-        filtered.sort((a,b) => (b.rank || 0) - (a.rank || 0));
-
-        filtered.forEach(e => {
-            const isAdmin = auth.currentUser.role === 'admin';
-            grid.innerHTML += `
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 border">${e.name.substring(0,2).toUpperCase()}</div>
-                        <div class="flex gap-1">
-                            <button onclick="app.viewJD(${e.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold">JD</button>
-                            ${isAdmin ? `<button onclick="app.editEmployee(${e.id})" class="text-slate-400 p-1 hover:text-blue-600"><i class="ph ph-pencil-simple"></i></button><button onclick="app.deleteEmployee(${e.id})" class="text-slate-400 p-1 hover:text-red-600"><i class="ph ph-trash"></i></button>` : ''}
-                        </div>
-                    </div>
-                    <h3 class="font-bold text-slate-800">${e.name}</h3>
-                    <p class="text-xs text-indigo-600 font-semibold mb-2">${e.position}</p>
-                    <div class="flex items-center justify-between mt-2">
-                         <span class="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded border">${e.branch}</span>
-                         <span class="text-[10px] px-2 py-0.5 rounded border font-bold bg-purple-50">Rank ${e.rank || '-'}</span>
-                    </div>
-                </div>`;
-        });
-    },
-
-    // --- Hierarchy Logic (OC Chart) ---
-    buildTree(parentId) {
-        return this.data
-            .filter(emp => emp.manager_id === parentId)
-            .map(emp => ({ ...emp, children: this.buildTree(emp.id) }));
-    },
-
-    createNode(emp) {
-        const isAdmin = auth.currentUser.role === 'admin';
-        return `
-            <div class="tree-node bg-white p-4 rounded-2xl shadow-md border-l-4 border-indigo-500 min-w-[200px] text-left">
-                <div class="font-bold text-slate-700 text-lg leading-tight">${emp.name}</div>
-                <div class="text-[11px] text-slate-400 mt-1">${emp.position}</div>
-                <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-50">
-                    <div class="flex gap-1">
-                        <button onclick="app.viewJD(${emp.id})" class="text-[9px] text-indigo-500 font-bold hover:underline">JD</button>
-                        ${isAdmin ? `<button onclick="app.editEmployee(${emp.id})" class="text-[9px] text-blue-500 font-bold hover:underline">Edit</button>` : ''}
-                    </div>
-                    <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-500">R-${emp.rank || '0'}</span>
-                </div>
-            </div>`;
-    },
-
-    renderTree(staffList) {
-        if (!staffList || staffList.length === 0) return '';
-        let html = '<ul class="flex flex-col items-center gap-6 mt-6">';
-        staffList.forEach(emp => {
-            html += `<li class="flex flex-col items-center relative">
-                ${this.createNode(emp)}
-                ${this.renderTree(emp.children)}
-            </li>`;
-        });
-        html += '</ul>';
-        return html;
-    },
-
-    renderChart() {
-        const root = document.getElementById('org-tree-root');
-        if (!root) return;
-        root.innerHTML = '';
-
-        const depts = {};
-        const sourceData = this.state.dept === 'All' ? this.data : this.data.filter(e => e.dept === this.state.dept);
+        /* Connectors */
+        .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; }
+        .tree li::after { right: auto; left: 50%; border-left: 1px solid #64748b; }
+        .tree li:only-child::after, .tree li:only-child::before { display: none; }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+        .tree li:last-child::before { border-right: 1px solid #64748b; border-radius: 0 5px 0 0; }
+        .tree li:first-child::after { border-radius: 5px 0 0 0; }
+        .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 1px solid #64748b; width: 0; height: 20px; }
         
-        sourceData.forEach(e => {
-            if (!depts[e.dept]) depts[e.dept] = [];
-            depts[e.dept].push(e);
-        });
-
-        let html = '<div class="flex flex-col items-center gap-12 w-full">';
-        for (const [deptName, staff] of Object.entries(depts)) {
-            // Department Header (Green Box)
-            html += `
-                <div class="flex flex-col items-center w-full">
-                    <div class="bg-green-50 text-green-600 border border-green-200 px-6 py-2 rounded-2xl font-bold mb-4 text-lg">
-                        ${deptName}
-                    </div>
-                    <div class="w-full flex justify-center border-t border-slate-100 pt-6">`;
-            
-            const maxRank = Math.max(...staff.map(s => s.rank || 0));
-            const heads = staff.filter(s => (s.rank || 0) === maxRank);
-            
-            html += '<div class="flex justify-center gap-10">';
-            heads.forEach(head => {
-                const branch = { ...head, children: this.buildTree(head.id) };
-                html += this.renderTree([branch]);
-            });
-            html += '</div></div></div>';
+        /* Employee Node Card */
+        .tree-node { 
+            border: 1px solid #cbd5e1; padding: 10px; display: inline-block; 
+            border-radius: 12px; background: white; transition: all 0.3s; 
+            min-width: 160px; position: relative; z-index: 1; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
         }
-        html += '</div>';
-        root.innerHTML = html;
-    },
-
-    // --- Modals & Actions ---
-    updateManagerList(currentId = null) {
-        const select = document.getElementById('inp-manager');
-        if(!select) return;
-        select.innerHTML = '<option value="">None (Top Boss)</option>';
-        this.data.forEach(emp => {
-            if (emp.id != currentId) {
-                const opt = document.createElement('option');
-                opt.value = emp.id;
-                opt.textContent = `${emp.name} (${emp.position})`;
-                select.appendChild(opt);
-            }
-        });
-    },
-
-    openAddModal() {
-        document.getElementById('emp-modal').classList.remove('hidden');
-        document.getElementById('modal-title').innerText = "Add New Employee";
-        document.querySelector('#emp-modal form').reset();
-        document.getElementById('inp-id').value = ""; 
-        this.updateManagerList();
-    },
-
-    editEmployee(id) {
-        const emp = this.data.find(e => e.id == id);
-        if(!emp) return;
-        document.getElementById('emp-modal').classList.remove('hidden');
-        document.getElementById('modal-title').innerText = "Edit Employee";
+        .tree-node:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); z-index: 50; border-color: #3b82f6; }
         
-        document.getElementById('inp-id').value = emp.id; 
-        document.getElementById('inp-name').value = emp.name;
-        document.getElementById('inp-company').value = emp.company || "";
-        document.getElementById('inp-dept').value = emp.dept || "";
-        document.getElementById('inp-branch').value = emp.branch || "";
-        document.getElementById('inp-pos').value = emp.position || "";
-        document.getElementById('inp-rank').value = emp.rank || 1;
-        document.getElementById('inp-jd').value = emp.jd || "";
+        /* Node Types */
+        .tree-node.company { background: #1e293b; color: white; border: none; font-size: 14px; font-weight: bold; }
+        .tree-node.dept { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: bold; }
         
-        this.updateManagerList(emp.id);
-        document.getElementById('inp-manager').value = emp.manager_id || "";
-    },
-
-    async saveEmployee(e) {
-        e.preventDefault();
-        this.toggleLoading(true);
-        const idInput = document.getElementById('inp-id').value; 
-        const mId = document.getElementById('inp-manager').value;
-
-        const empObj = {
-            name: document.getElementById('inp-name').value,
-            company: document.getElementById('inp-company').value,
-            dept: document.getElementById('inp-dept').value,
-            branch: document.getElementById('inp-branch').value,
-            position: document.getElementById('inp-pos').value,
-            rank: parseInt(document.getElementById('inp-rank').value) || 1,
-            jd: document.getElementById('inp-jd').value,
-            manager_id: mId ? parseInt(mId) : null
-        };
-
-        const success = idInput ? await db.update(parseInt(idInput), empObj) : await db.add(empObj);
-        if (success) {
-            this.data = await db.getAll(); 
-            this.closeModal('emp-modal');
-            this.init();
-        }
-        this.toggleLoading(false);
-    },
-
-    async deleteEmployee(id) {
-        if(confirm("Delete this employee?")) {
-            this.toggleLoading(true);
-            if(await db.delete(id)) {
-                this.data = await db.getAll();
-                this.init();
-            }
-            this.toggleLoading(false);
-        }
-    },
-
-    viewJD(id) {
-        const emp = this.data.find(e => e.id == id);
-        if(!emp) return;
-        document.getElementById('jd-name').innerText = emp.name;
-        document.getElementById('jd-pos').innerText = emp.position;
-        document.getElementById('jd-id-display').innerText = emp.id;
-        document.getElementById('jd-rank-display').innerText = emp.rank || '-';
-        document.getElementById('jd-avatar').innerText = emp.name.substring(0,2).toUpperCase();
-        document.getElementById('jd-dept').innerText = emp.dept;
-        document.getElementById('jd-branch').innerText = emp.branch;
-        document.getElementById('jd-company').innerText = emp.company;
-        document.getElementById('jd-content').innerText = emp.jd || "No Description.";
+        /* Rank Colors (High Num = High Rank) */
+        .rank-high { background: #eff6ff; border-left: 4px solid #3b82f6; } /* Rank 8-10 (Manager) */
+        .rank-med { background: #f5f3ff; border-left: 4px solid #8b5cf6; } /* Rank 5-7 (Supervisor) */
+        .rank-low { border-left: 4px solid #cbd5e1; } /* Rank 1-4 (Staff) */
         
-        const modal = document.getElementById('jd-view-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    },
-
-    closeModal(id) { 
-        const modal = document.getElementById(id);
-        if(modal) {
-            modal.classList.add('hidden'); 
-            modal.classList.remove('flex');
-        }
-    }
-};
-
-// Start the Application
-window.addEventListener('DOMContentLoaded', () => auth.init());
+        /* Hover Actions */
+        .node-actions { display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #334155; padding: 4px; border-radius: 6px; gap: 4px; z-index: 100; margin-top: 5px; }
+        .tree-node:hover .node-actions { display: flex; }
+        
+        #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
+        
+        
