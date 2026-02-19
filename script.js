@@ -1,7 +1,7 @@
 // 1. Supabase Configuration
 // ==========================================
 const SUPABASE_URL = 'https://fjrllvtkbehysuhapnob.supabase.co'; 
-const SUPABASE_KEY = ''; // သင်၏ Key ကို ဒီနေရာမှာ ပြန်ထည့်ပါ
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqcmxsdnRrYmVoeXN1aGFwbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODI1OTcsImV4cCI6MjA4Njc1ODU5N30.GcrORx1vnZ4BAm6ZSjxyFtvBeOZGDLofORMz-VnG55k'; // သင်၏ Key ကို ဒီနေရာမှာ ပြန်ထည့်ပါ
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 2. AUTH Logic (Login & Roles)
@@ -330,3 +330,4 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
