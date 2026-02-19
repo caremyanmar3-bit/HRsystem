@@ -1,12 +1,17 @@
 // 1. Supabase Configuration
 // ==========================================
 const SUPABASE_URL = 'https://fjrllvtkbehysuhapnob.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqcmxsdnRrYmVoeXN1aGFwbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODI1OTcsImV4cCI6MjA4Njc1ODU5N30.GcrORx1vnZ4BAm6ZSjxyFtvBeOZGDLofORMz-VnG55k'; // သင်၏ Key ကို ဒီနေရာမှာ ပြန်ထည့်ပါ
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqcmxsdnRrYmVoeXN1aGFwbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODI1OTcsImV4cCI6MjA4Njc1ODU5N30.GcrORx1vnZ4BAm6ZSjxyFtvBeOZGDLofORMz-VnG55k'; 
 
+// Error မတက်အောင် ကာကွယ်ထားခြင်း
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
+if (!sb) {
+    console.error("🚨 Supabase script is missing in HTML!");
+    alert("System Error: Database connection failed. Please check HTML scripts.");
+}
 
-// 2. AUTH Logic (Login & Roles)
+// 2. AUTH Logic
 // ==========================================
 const auth = {
     currentUser: null,
@@ -17,7 +22,8 @@ const auth = {
             this.applyRole();
             app.init();
         } else {
-            document.getElementById('login-overlay').classList.remove('hidden');
+            const overlay = document.getElementById('login-overlay');
+            if(overlay) overlay.classList.remove('hidden');
         }
     },
     login(e) {
@@ -43,7 +49,8 @@ const auth = {
     },
     applyRole() {
         const isAdmin = this.currentUser.role === 'admin';
-        document.getElementById('user-role-badge').textContent = isAdmin ? 'Admin' : 'Viewer';
+        const badge = document.getElementById('user-role-badge');
+        if(badge) badge.textContent = isAdmin ? 'Admin' : 'Viewer';
         document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
     }
 };
@@ -52,6 +59,7 @@ const auth = {
 // ==========================================
 const db = {
     async getAll() {
+        if(!sb) return [];
         const { data, error } = await sb.from('employees').select('*');
         if (error) { console.error("DB Error:", error); return []; }
         return data;
@@ -70,21 +78,7 @@ const db = {
     }
 };
 
-// 4. Chart Controls (Zoom & Reset)
-// ==========================================
-const chart = {
-    scale: 1,
-    zoom(delta) {
-        this.scale = Math.max(0.3, Math.min(2, this.scale + delta));
-        document.getElementById('org-tree-root').style.transform = `scale(${this.scale})`;
-    },
-    reset() { 
-        this.scale = 1; 
-        document.getElementById('org-tree-root').style.transform = `scale(1)`; 
-    }
-};
-
-// 5. Main App Logic
+// 4. Main App Logic
 // ==========================================
 const app = {
     data: [],
@@ -98,16 +92,21 @@ const app = {
         this.renderList();
         this.renderChart();
         
-        document.getElementById('search-input').oninput = (e) => {
-            this.state.search = e.target.value.toLowerCase();
-            this.renderList();
-        };
+        const searchInput = document.getElementById('search-input');
+        if(searchInput) {
+            searchInput.oninput = (e) => {
+                this.state.search = e.target.value.toLowerCase();
+                this.renderList();
+            };
+        }
     },
 
     toggleLoading(show) {
         const loader = document.getElementById('loading-overlay');
-        loader.classList.toggle('hidden', !show);
-        loader.classList.toggle('flex', show);
+        if(loader) {
+            loader.classList.toggle('hidden', !show);
+            loader.classList.toggle('flex', show);
+        }
     },
 
     switchView(view) {
@@ -128,16 +127,17 @@ const app = {
         }
     },
 
-    // --- Sidebar & Filtering ---
+    // --- Sidebar ---
     renderSidebar() {
         const depts = {};
         this.data.forEach(e => depts[e.dept] = (depts[e.dept] || 0) + 1);
         const sidebar = document.getElementById('dept-sidebar');
-        
-        sidebar.innerHTML = `<button onclick="app.filterDept('All')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm font-bold flex justify-between ${this.state.dept==='All' ? 'bg-indigo-50 text-indigo-700':'text-slate-600'}">All Depts <span>${this.data.length}</span></button>`;
+        if(!sidebar) return;
+
+        sidebar.innerHTML = `<button onclick="app.filterDept('All')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm font-bold flex justify-between ${this.state.dept==='All' ? 'bg-indigo-50 text-indigo-700':'text-slate-600 hover:bg-slate-100'}">All Depts <span>${this.data.length}</span></button>`;
         
         Object.entries(depts).sort((a,b)=>b[1]-a[1]).forEach(([d, c]) => {
-            sidebar.innerHTML += `<button onclick="app.filterDept('${d}')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm flex justify-between ${this.state.dept===d ? 'bg-indigo-50 text-indigo-700 font-bold':'text-slate-600'}"><span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs">${c}</span></button>`;
+            sidebar.innerHTML += `<button onclick="app.filterDept('${d}')" class="w-full text-left px-3 py-2 rounded mb-1 text-sm flex justify-between ${this.state.dept===d ? 'bg-indigo-50 text-indigo-700 font-bold':'text-slate-600 hover:bg-slate-100'}"><span class="truncate pr-2">${d}</span> <span class="bg-slate-200 px-1.5 rounded text-xs">${c}</span></button>`;
         });
         document.getElementById('total-count').innerText = this.data.length;
     },
@@ -149,9 +149,10 @@ const app = {
         this.renderChart();
     },
 
-    // --- List View Rendering ---
+    // --- List View ---
     renderList() {
         const grid = document.getElementById('employee-grid');
+        if(!grid) return;
         grid.innerHTML = '';
         const filtered = this.data.filter(e => {
             const matchDept = this.state.dept === 'All' || e.dept === this.state.dept;
@@ -169,7 +170,7 @@ const app = {
                         <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 border">${e.name.substring(0,2).toUpperCase()}</div>
                         <div class="flex gap-1">
                             <button onclick="app.viewJD(${e.id})" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold">JD</button>
-                            ${isAdmin ? `<button onclick="app.editEmployee(${e.id})" class="text-slate-400 p-1"><i class="ph ph-pencil-simple"></i></button><button onclick="app.deleteEmployee(${e.id})" class="text-slate-400 p-1"><i class="ph ph-trash"></i></button>` : ''}
+                            ${isAdmin ? `<button onclick="app.editEmployee(${e.id})" class="text-slate-400 p-1 hover:text-blue-600"><i class="ph ph-pencil-simple"></i></button><button onclick="app.deleteEmployee(${e.id})" class="text-slate-400 p-1 hover:text-red-600"><i class="ph ph-trash"></i></button>` : ''}
                         </div>
                     </div>
                     <h3 class="font-bold text-slate-800">${e.name}</h3>
@@ -182,7 +183,7 @@ const app = {
         });
     },
 
-    // --- Hierarchy Chart Logic ---
+    // --- Chart Hierarchy Logic ---
     buildTree(parentId) {
         return this.data
             .filter(emp => emp.manager_id === parentId)
@@ -190,80 +191,83 @@ const app = {
     },
 
     createNode(emp) {
-        const isAdmin = auth.currentUser.role === 'admin';
+        // ပုံစံအတိုင်း ခရမ်းရောင်အနားသတ်နှင့် Card ဒီဇိုင်း
         return `
-            <div class="tree-node rank-med group">
-               
-                <div class="font-bold truncate text-slate-700">${emp.name}</div>
-                <div class="text-[10px] text-slate-500 truncate opacity-90">${emp.position}</div>
-                <div class="flex justify-between items-center mt-1">
-                    <div class="text-[9px] text-slate-400">${emp.branch}</div>
-                    <div class="text-[9px] font-bold bg-white/50 px-1 rounded text-slate-600">R-${emp.rank||'?'}</div>
-                </div>
-                <div class="node-actions">
-                    <button onclick="app.viewJD(${emp.id})" class="text-[10px] text-white bg-indigo-500 px-2 py-0.5 rounded">JD</button>
-                    ${isAdmin ? `<button onclick="app.editEmployee(${emp.id})" class="text-[10px] text-white bg-blue-500 px-2 py-0.5 rounded">Edit</button>` : ''}
+            <div class="bg-indigo-50/30 p-4 rounded-xl shadow-sm border-l-[6px] border-indigo-500 min-w-[220px] text-left relative z-10 mx-2">
+                <div class="font-bold text-slate-800 text-[16px]">${emp.name}</div>
+                <div class="text-[12px] text-slate-500 mt-1">${emp.position}</div>
+                <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200/60">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">${emp.branch || 'YGN'}</span>
+                    <span class="text-[10px] bg-white px-2 py-0.5 rounded-full font-bold text-slate-700 shadow-sm border border-slate-100">R-${emp.rank || '0'}</span>
                 </div>
             </div>`;
     },
 
     renderTree(staffList) {
         if (!staffList || staffList.length === 0) return '';
-        let html = '<ul>';
+        let html = '<ul class="flex justify-center gap-4 mt-8">';
         staffList.forEach(emp => {
-            html += `<li>${this.createNode(emp)}`;
-            html += this.renderTree(emp.children);
-            html += '</li>';
+            html += `<li class="flex flex-col items-center relative">
+                ${this.createNode(emp)}
+                ${this.renderTree(emp.children)}
+            </li>`;
         });
         html += '</ul>';
         return html;
     },
-      renderChart() {
-    const root = document.getElementById('org-tree-root');
-    root.innerHTML = '';
 
-    let topNodes = [];
+    renderChart() {
+        const root = document.getElementById('org-tree-root');
+        if (!root) return;
+        root.innerHTML = '';
 
-    if (this.state.dept === 'All') {
-        // ၁။ အားလုံးကြည့်မယ်ဆိုရင် Top Boss (manager_id: null) ကနေ စမယ်
-        topNodes = this.data.filter(emp => emp.manager_id === null);
-    } else {
-        // ၂။ ဌာနတစ်ခုတည်းဆိုရင် အဲဒီဌာနထဲက Rank အမြင့်ဆုံးလူ (Dept Head) ကို ရှာမယ်
-        const deptStaff = this.data.filter(e => e.dept === this.state.dept);
+        const depts = {};
+        const sourceData = this.state.dept === 'All' ? this.data : this.data.filter(e => e.dept === this.state.dept);
         
-        if (deptStaff.length > 0) {
-            // Rank အကြီးဆုံးဂဏန်းကို ရှာခြင်း
-            const maxRank = Math.max(...deptStaff.map(s => s.rank || 0));
-            // အဲဒီ Rank ရှိတဲ့လူကို Dept Head အဖြစ် သတ်မှတ်မယ်
-            topNodes = deptStaff.filter(s => (s.rank || 0) === maxRank);
+        sourceData.forEach(e => {
+            if (!depts[e.dept]) depts[e.dept] = [];
+            depts[e.dept].push(e);
+        });
+
+        let html = '<div class="flex flex-col items-center gap-16 w-full pt-4">';
+        for (const [deptName, staff] of Object.entries(depts)) {
+            
+            // Department Header (ပုံထဲက အစိမ်းရောင် Box)
+            html += `
+                <div class="flex flex-col items-center w-full">
+                    <div class="bg-green-50 text-green-700 border border-green-200 px-6 py-2 rounded-2xl font-bold text-lg shadow-sm z-20">
+                        ${deptName}
+                    </div>
+                    <div class="w-full flex justify-center">`;
+            
+            const maxRank = Math.max(...staff.map(s => s.rank || 0));
+            const heads = staff.filter(s => (s.rank || 0) === maxRank);
+            
+            html += '<ul class="flex justify-center gap-8 mt-6">';
+            heads.forEach(head => {
+                const branch = { ...head, children: this.buildTree(head.id) };
+                html += `<li class="flex flex-col items-center relative">
+                            ${this.createNode(branch)}
+                            ${this.renderTree(branch.children)}
+                         </li>`;
+            });
+            html += '</ul></div></div>';
         }
-    }
+        html += '</div>';
+        root.innerHTML = html;
+    },
 
-    if (topNodes.length === 0) {
-        root.innerHTML = '<div class="p-10 text-slate-400">No Hierarchy Data Found</div>';
-        return;
-    }
-
-    // Tree တည်ဆောက်ပြီး Render လုပ်မယ်
-    let finalHtml = '';
-    topNodes.forEach(head => {
-        const branchData = {
-            ...head,
-            children: this.buildTree(head.id)
-        };
-        finalHtml += this.renderTree([branchData]);
-    });
-
-    root.innerHTML = finalHtml;
-},
-    // --- Modals & Actions ---
+    // --- Actions ---
     updateManagerList(currentId = null) {
         const select = document.getElementById('inp-manager');
         if(!select) return;
         select.innerHTML = '<option value="">None (Top Boss)</option>';
         this.data.forEach(emp => {
             if (emp.id != currentId) {
-                select.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
+                const opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = `${emp.name} (${emp.position})`;
+                select.appendChild(opt);
             }
         });
     },
@@ -292,13 +296,17 @@ const app = {
         document.getElementById('inp-jd').value = emp.jd || "";
         
         this.updateManagerList(emp.id);
-        document.getElementById('inp-manager').value = emp.manager_id || "";
+        const mInput = document.getElementById('inp-manager');
+        if(mInput) mInput.value = emp.manager_id || "";
     },
 
     async saveEmployee(e) {
         e.preventDefault();
         this.toggleLoading(true);
         const idInput = document.getElementById('inp-id').value; 
+        const mInput = document.getElementById('inp-manager');
+        const mId = mInput ? mInput.value : null;
+
         const empObj = {
             name: document.getElementById('inp-name').value,
             company: document.getElementById('inp-company').value,
@@ -307,10 +315,10 @@ const app = {
             position: document.getElementById('inp-pos').value,
             rank: parseInt(document.getElementById('inp-rank').value) || 1,
             jd: document.getElementById('inp-jd').value,
-            manager_id: parseInt(document.getElementById('inp-manager').value) || null
+            manager_id: mId ? parseInt(mId) : null
         };
 
-        const success = idInput ? await db.update(idInput, empObj) : await db.add(empObj);
+        const success = idInput ? await db.update(parseInt(idInput), empObj) : await db.add(empObj);
         if (success) {
             this.data = await db.getAll(); 
             this.closeModal('emp-modal');
@@ -344,18 +352,19 @@ const app = {
         document.getElementById('jd-content').innerText = emp.jd || "No Description.";
         
         const modal = document.getElementById('jd-view-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        if(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     },
 
     closeModal(id) { 
         const modal = document.getElementById(id);
-        modal.classList.add('hidden'); 
-        modal.classList.remove('flex');
+        if(modal) {
+            modal.classList.add('hidden'); 
+            modal.classList.remove('flex');
+        }
     }
 };
 
-// Start the Application
-
 window.addEventListener('DOMContentLoaded', () => auth.init());
-
