@@ -216,18 +216,44 @@ const app = {
         return html;
     },
 
-    renderChart() {
-        const root = document.getElementById('org-tree-root');
-        root.innerHTML = '';
+     renderChart() {
+    const root = document.getElementById('org-tree-root');
+    root.innerHTML = '';
+
+    let topNodes = [];
+
+    if (this.state.dept === 'All') {
+        // ၁။ အားလုံးကြည့်မယ်ဆိုရင် Top Boss (manager_id: null) ကနေ စမယ်
+        topNodes = this.data.filter(emp => emp.manager_id === null);
+    } else {
+        // ၂။ ဌာနတစ်ခုတည်းဆိုရင် အဲဒီဌာနထဲက Rank အမြင့်ဆုံးလူ (Dept Head) ကို ရှာမယ်
+        const deptStaff = this.data.filter(e => e.dept === this.state.dept);
         
-        // Chart view မှာ Hierarchy တစ်ခုလုံးကို ပြသမယ်
-        const treeData = this.buildTree(null); 
-        if (treeData.length === 0) {
-            root.innerHTML = '<div class="p-10 text-slate-400">No Data Available</div>';
-            return;
+        if (deptStaff.length > 0) {
+            // Rank အကြီးဆုံးဂဏန်းကို ရှာခြင်း
+            const maxRank = Math.max(...deptStaff.map(s => s.rank || 0));
+            // အဲဒီ Rank ရှိတဲ့လူကို Dept Head အဖြစ် သတ်မှတ်မယ်
+            topNodes = deptStaff.filter(s => (s.rank || 0) === maxRank);
         }
-        root.innerHTML = this.renderTree(treeData);
-    },
+    }
+
+    if (topNodes.length === 0) {
+        root.innerHTML = '<div class="p-10 text-slate-400">No Hierarchy Data Found</div>';
+        return;
+    }
+
+    // Tree တည်ဆောက်ပြီး Render လုပ်မယ်
+    let finalHtml = '';
+    topNodes.forEach(head => {
+        const branchData = {
+            ...head,
+            children: this.buildTree(head.id)
+        };
+        finalHtml += this.renderTree([branchData]);
+    });
+
+    root.innerHTML = finalHtml;
+},
 
     // --- Modals & Actions ---
     updateManagerList(currentId = null) {
@@ -330,4 +356,5 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
