@@ -24,7 +24,7 @@ const auth = {
         e.preventDefault();
         const u = document.getElementById('login-user').value.toLowerCase();
         const p = document.getElementById('login-pass').value;
-        if ((u === 'admin' && p === '1care@2026') || (u === 'guest' && p === '1care@2025')) {
+        if ((u === 'admin' && p === '1234') || (u === 'guest' && p === '1care@2025')) {
             this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
         } else {
             alert('Invalid Login!');
@@ -358,3 +358,4 @@ const app = {
 // Start the Application
 
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
