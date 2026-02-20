@@ -166,23 +166,14 @@
                     </datalist>
                 </div>
 
-                 <div>
-                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Reports To</label>
-    
-                 <input list="managers" id="inp-manager" placeholder="None (Top Boss)" required class="w-full border p-2 rounded text-sm h-10 bg-white">
-    
-                 <datalist id="managers">
-                 <option value="None (Top Boss)"></option>
-                 <option value="U Nay Lin Aung"></option>
-                 <option value="Kyaw Soe Moe Latt"></option>
-                 <option value="Khin Khin Htwe"></option>
-                 <option value="Kyaw Win Hlaing"></option>
-                 <option value="Eindra Thu"></option> 
-                 <option value="Phyo Theingi"></option>
-                 <option value="Aung Zaw Win"></option> 
-                 <option value="Moe Moe Aung"></option>    
-                 </datalist>
-                 </div>
+             <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Reports To</label>
+                    <input type="text" id="inp-manager" required class="w-full border p-2 rounded text-sm h-10 bg-white">
+                    <select  id="inp-manager" required class="w-full border p-2 rounded text-sm h-10 bg-white">
+                        <option value="">None (Top Boss)</option>
+                    
+                     </select>
+             </div>
             </div>
             
             <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -256,6 +247,7 @@
 
 
 </html>
+
 
 
 
