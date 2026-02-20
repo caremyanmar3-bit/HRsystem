@@ -25,13 +25,18 @@
        .custom-scroll::-webkit-scrollbar-thumb:hover {
          background: #64748b; /* Mouse တင်လိုက်ရင် နည်းနည်း ပိုရင့်သွားမယ် */
          }
-        
-        .tree-container { 
-    display: inline-block;   /* flex မသုံး */
-    padding-bottom: 80px; 
-    transform-origin: top left; 
-    transition: transform 0.3s ease; 
-}
+
+      .tree-wrapper {
+       width: 100%;
+       overflow-x: auto;   /* horizontal scroll enable */
+       overflow-y: auto;
+      }
+     .tree-container {
+       display: inline-block;   /* flex မသုံး */
+       min-width: max-content;  /* content အတိုင်းအကျယ်ယူ */
+       padding-bottom: 80px;
+      transform-origin: top left;
+      }
 
         /* Tree Structure မျဉ်းကြောင်းများ */
        #org-tree-root ul {
@@ -95,6 +100,7 @@
         #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
         
         
+
 
 
 
