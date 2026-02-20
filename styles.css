@@ -32,17 +32,19 @@
        overflow: hidden;
        }
 
-      .tree-wrapper {
+       .tree-wrapper {
        width: 100%;
-       overflow-x: auto;   /* horizontal scroll enable */
+       height: 100%;
+       overflow-x: auto;
        overflow-y: auto;
-      }
-     .tree-container {
-       display: inline-block;   /* flex မသုံး */
-       min-width: max-content;  /* content အတိုင်းအကျယ်ယူ */
-       padding-bottom: 80px;
-      transform-origin: top left;
-      }
+       }
+
+      .tree-container {
+       display: inline-block;
+       min-width: max-content;   /* 🔥 important */
+        padding: 40px;
+       transform-origin: top center;
+       }
 
         /* Tree Structure မျဉ်းကြောင်းများ */
        #org-tree-root ul {
@@ -132,6 +134,7 @@
         #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
         
         
+
 
 
 
