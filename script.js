@@ -93,6 +93,8 @@ const db = {
 
 // 4. Chart Controls (Zoom & Reset)
 // ==========================================
+// 4. Chart Controls (Zoom & Reset & Full Screen)
+// ==========================================
 const chart = {
     scale: 1,
 
@@ -100,19 +102,30 @@ const chart = {
         this.scale = Math.max(0.4, Math.min(2, this.scale + delta));
         const root = document.getElementById('org-tree-root');
 
-        root.style.transformOrigin = "top left";
-        root.style.transform = `scale(${this.scale})`;
+        // ❗ ယခင် transform အစား zoom ကို ပြောင်းသုံးထားပါတယ် ❗
+        root.style.zoom = this.scale;
     },
 
     reset() {
         this.scale = 1;
         const root = document.getElementById('org-tree-root');
 
-        root.style.transformOrigin = "top left";
-        root.style.transform = "scale(1)";
+        // မူလ ဆိုဒ်အတိုင်း ပြန်ထားပါမယ်
+        root.style.zoom = 1;
+    },
+    
+    // Full Screen ဖွင့်/ပိတ် လုပ်ပေးမည့် Code
+    toggleFullscreen() {
+        const chartView = document.getElementById('view-chart');
+        if (!document.fullscreenElement) {
+            chartView.requestFullscreen().catch(err => {
+                console.error(`Error: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
     }
 };
-
 // 5. Main App Logic
 // ==========================================
 const app = {
@@ -391,6 +404,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
