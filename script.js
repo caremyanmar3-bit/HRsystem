@@ -288,8 +288,8 @@ const app = {
             const empRank = parseInt(emp.rank) || 0;
             
             // ၁။ ကိုယ်တိုင်ကို ပြန်မရွေးမိအောင် စစ်မယ် (emp.id != currentId)
-            // ၂။ Rank 5 နဲ့ အထက်ဖြစ်ရမယ် (သို့မဟုတ်) သူဟာ လက်ရှိ Manager ဟောင်း ဖြစ်နေရမယ်
-            if (emp.id != currentId && (empRank >= 5 || emp.id == currentManagerId)) {
+            // ၂။ Rank 4 နဲ့ အထက်ဖြစ်ရမယ် (သို့မဟုတ်) သူဟာ လက်ရှိ Manager ဟောင်း ဖြစ်နေရမယ်
+            if (emp.id != currentId && (empRank >= 4 || emp.id == currentManagerId)) {
                 select.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
             }
         });
@@ -383,6 +383,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
