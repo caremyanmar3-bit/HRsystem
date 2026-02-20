@@ -279,23 +279,27 @@ const app = {
 },
 
     // --- Modals & Actions ---
-    updateManagerList(currentId = null) {
+    updateManagerList(currentId = null, currentManagerId = null) {
         const select = document.getElementById('inp-manager');
         if(!select) return;
         select.innerHTML = '<option value="">None (Top Boss)</option>';
+        
         this.data.forEach(emp => {
-            if (emp.id != currentId) {
+            const empRank = parseInt(emp.rank) || 0;
+            
+            // ၁။ ကိုယ်တိုင်ကို ပြန်မရွေးမိအောင် စစ်မယ် (emp.id != currentId)
+            // ၂။ Rank 5 နဲ့ အထက်ဖြစ်ရမယ် (သို့မဟုတ်) သူဟာ လက်ရှိ Manager ဟောင်း ဖြစ်နေရမယ်
+            if (emp.id != currentId && (empRank >= 5 || emp.id == currentManagerId)) {
                 select.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.position})</option>`;
             }
         });
     },
-
     openAddModal() {
         document.getElementById('emp-modal').classList.remove('hidden');
         document.getElementById('modal-title').innerText = "Add New Employee";
         document.querySelector('#emp-modal form').reset();
         document.getElementById('inp-id').value = ""; 
-        this.updateManagerList();
+        this.updateManagerList(null, null);
     },
 
     editEmployee(id) {
@@ -313,7 +317,7 @@ const app = {
         document.getElementById('inp-rank').value = emp.rank || 1;
         document.getElementById('inp-jd').value = emp.jd || "";
         
-        this.updateManagerList(emp.id);
+        this.updateManagerList(emp.id,emp.manager_id);
         document.getElementById('inp-manager').value = emp.manager_id || "";
     },
 
@@ -379,6 +383,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
