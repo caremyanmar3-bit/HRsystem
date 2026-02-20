@@ -100,7 +100,7 @@ const chart = {
         this.scale = Math.max(0.4, Math.min(2, this.scale + delta));
         const root = document.getElementById('org-tree-root');
 
-        root.style.transformOrigin = "top left";
+        root.style.transformOrigin = "top center";
         root.style.transform = `scale(${this.scale})`;
     },
 
@@ -108,7 +108,7 @@ const chart = {
         this.scale = 1;
         const root = document.getElementById('org-tree-root');
 
-        root.style.transformOrigin = "top left";
+        root.style.transformOrigin = "top center";
         root.style.transform = "scale(1)";
     }
 };
@@ -391,6 +391,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
