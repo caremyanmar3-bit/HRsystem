@@ -26,6 +26,12 @@
          background: #64748b; /* Mouse တင်လိုက်ရင် နည်းနည်း ပိုရင့်သွားမယ် */
          }
 
+       .chart-section {
+       position: relative;
+       height: calc(100vh - 120px); /* header + footer space */
+       overflow: hidden;
+       }
+
       .tree-wrapper {
        width: 100%;
        overflow-x: auto;   /* horizontal scroll enable */
@@ -70,26 +76,26 @@
 ========================================== */
 
 /* Fullscreen ဝင်သွားချိန်တွင် နောက်ခံအမည်းရောင်မဖြစ်စေရန်နှင့် အပြည့်ဖြစ်စေရန် */
-#view-chart:fullscreen {
-    background-color: #f1f5f9; /* bg-slate-100 အရောင် */
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-}
+      #view-chart:fullscreen {
+      background-color: #f1f5f9; /* bg-slate-100 အရောင် */
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      }
 
-/* Safari Browser များအတွက် */
-#view-chart:-webkit-full-screen {
-    background-color: #f1f5f9;
-    width: 100vw;
-    height: 100vh;
-}
+      /* Safari Browser များအတွက် */
+      #view-chart:-webkit-full-screen {
+      background-color: #f1f5f9;
+      width: 100vw;
+      height: 100vh;
+      }
 
-/* Fullscreen ထဲရောက်နေချိန် Zoom ခလုတ်လေးများကို ပိုပြီး သပ်ရပ်အောင်ထားရန် */
-#view-chart:fullscreen .absolute {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-}
+     /* Fullscreen ထဲရောက်နေချိန် Zoom ခလုတ်လေးများကို ပိုပြီး သပ်ရပ်အောင်ထားရန် */
+        #view-chart:fullscreen .absolute {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+       }
         
         /* Connectors */
         .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 1px solid #64748b; width: 50%; height: 20px; }
@@ -126,6 +132,7 @@
         #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
         
         
+
 
 
 
