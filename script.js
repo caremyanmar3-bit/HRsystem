@@ -95,19 +95,21 @@ const db = {
 // ==========================================
 const chart = {
     scale: 1,
+
     zoom(delta) {
-        this.scale = Math.max(0.3, Math.min(2, this.scale + delta));
+        this.scale = Math.max(0.4, Math.min(2, this.scale + delta));
         const root = document.getElementById('org-tree-root');
-        
-        // Zoom လုပ်တဲ့ ဗဟိုမှတ်ကို အပေါ်ဘက် အလယ် (top center) သို့မဟုတ် (top left) လို့ ပေးပါမယ်
-        root.style.transformOrigin = 'top center'; 
+
+        root.style.transformOrigin = "top left";
         root.style.transform = `scale(${this.scale})`;
     },
-    reset() { 
-        this.scale = 1; 
+
+    reset() {
+        this.scale = 1;
         const root = document.getElementById('org-tree-root');
-        root.style.transformOrigin = 'top center';
-        root.style.transform = `scale(1)`; 
+
+        root.style.transformOrigin = "top left";
+        root.style.transform = "scale(1)";
     }
 };
 
@@ -389,6 +391,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
