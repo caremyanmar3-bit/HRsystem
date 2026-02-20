@@ -98,9 +98,8 @@
               <button onclick="chart.reset()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-arrows-out"></i></button>
               <button onclick="chart.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600"><i class="ph ph-plus"></i></button>
               </div>
-    
-              <div class="w-full h-full overflow-auto custom-scroll pt-20 px-10" id="chart-viewport">
-              <div class="tree-container tree min-w-max w-max mx-auto pb-20" id="org-tree-root"></div>
+              <div class="w-full h-full overflow-x-scroll overflow-y-auto custom-scroll p-10" id="chart-viewport">
+              <div class="tree-container tree w-max mx-auto origin-top" id="org-tree-root"></div>
               </div>
             </div>
         </main>
@@ -247,6 +246,7 @@
 
 
 </html>
+
 
 
 
