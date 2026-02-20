@@ -18,16 +18,39 @@ const auth = {
             document.getElementById('login-overlay').classList.remove('hidden');
         }
     },
-    login(e) {
-        e.preventDefault();
-        const u = document.getElementById('login-user').value.toLowerCase();
-        const p = document.getElementById('login-pass').value;
-        if ((u === 'admin' && p === 'care@2026') || (u === 'guest' && p === '4321')) {
-            this.setSession({ role: u === 'admin' ? 'admin' : 'viewer' });
+    async login(e) {
+    e.preventDefault();
+    
+    // User ရိုက်ထည့်လိုက်တဲ့ Data ကို ယူမယ်
+    const u = document.getElementById('login-user').value.toLowerCase();
+    const p = document.getElementById('login-pass').value;
+
+    try {
+        // Backend API ဆီကို Fetch သုံးပြီး လှမ်းပို့ပါမယ်
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // Username နဲ့ Password ကို API ဆီ ပို့လိုက်ပါပြီ
+            body: JSON.stringify({ username: u, password: p })
+        });
+
+        // Backend က ပြန်ပို့လိုက်တဲ့ အဖြေ (Response) ကို ယူမယ်
+        const data = await response.json();
+
+        if (data.success) {
+            // Login အောင်မြင်သွားရင် Session ထဲ မှတ်မယ်
+            this.setSession({ role: data.role, token: data.token });
         } else {
-            alert('Invalid Login!');
+            // မှားနေရင် Backend က ပို့တဲ့ Message ကို Alert ပြမယ်
+            alert(data.message);
         }
-    },
+    } catch (error) {
+        console.error('Error connecting to API:', error);
+        alert('Server Error. Please try again later.');
+    }
+},
     setSession(user) {
         this.currentUser = user;
         sessionStorage.setItem('user_session', JSON.stringify(user));
@@ -356,6 +379,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
