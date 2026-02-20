@@ -32,12 +32,14 @@
        overflow: hidden;
        }
 
-       .tree-wrapper {
+       .tree-wrapper::-webkit-scrollbar {
        width: 100%;
        height: 100%;
        overflow-x: auto;
        overflow-y: auto;
        }
+
+
 
       .tree-container {
        display: inline-block;
@@ -134,6 +136,7 @@
         #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
         
         
+
 
 
 
