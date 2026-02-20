@@ -26,10 +26,12 @@
          background: #64748b; /* Mouse တင်လိုက်ရင် နည်းနည်း ပိုရင့်သွားမယ် */
          }
         
-        /* Tree Structure CSS */
-        .tree-container { display: flex; justify-content: center; padding-bottom: 80px; transform-origin: top center; transition: transform 0.3s ease; }
-        .tree ul { padding-top: 20px; position: relative; display: flex; justify-content: center; }
-        .tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
+        .tree-container { 
+    display: inline-block;   /* flex မသုံး */
+    padding-bottom: 80px; 
+    transform-origin: top left; 
+    transition: transform 0.3s ease; 
+}
 
         /* Tree Structure မျဉ်းကြောင်းများ */
        #org-tree-root ul {
@@ -93,5 +95,6 @@
         #login-overlay, #loading-overlay { backdrop-filter: blur(5px); }
         
         
+
 
 
