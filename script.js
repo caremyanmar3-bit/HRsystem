@@ -91,8 +91,7 @@ const db = {
     }
 };
 
-// 4. Chart Controls (Zoom & Reset)
-// ==========================================
+
 // 4. Chart Controls (Zoom & Reset & Full Screen)
 // ==========================================
 const chart = {
@@ -126,6 +125,58 @@ const chart = {
         }
     }
 };
+// 6. Chart Drag to Scroll (မြေပုံလို Mouse ဖြင့် ဖိဆွဲကြည့်နိုင်ရန်)
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const viewport = document.getElementById('chart-viewport');
+    let isDown = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    if(!viewport) return;
+
+    // မူလအချိန်တွင် Mouse ကို လက်ဝါးပုံစံလေး ပြထားမည်
+    viewport.style.cursor = 'grab';
+
+    // Mouse စနှိပ်လိုက်သောအခါ
+    viewport.addEventListener('mousedown', (e) => {
+        isDown = true;
+        viewport.style.cursor = 'grabbing'; // ဆုပ်ကိုင်လိုက်သော ပုံစံပြောင်းမည်
+        startX = e.pageX - viewport.offsetLeft;
+        startY = e.pageY - viewport.offsetTop;
+        scrollLeft = viewport.scrollLeft;
+        scrollTop = viewport.scrollTop;
+    });
+
+    // Mouse အပြင်ရောက်သွားသောအခါ
+    viewport.addEventListener('mouseleave', () => {
+        isDown = false;
+        viewport.style.cursor = 'grab';
+    });
+
+    // Mouse ပြန်လွှတ်လိုက်သောအခါ
+    viewport.addEventListener('mouseup', () => {
+        isDown = false;
+        viewport.style.cursor = 'grab';
+    });
+
+    // Mouse ဖိပြီး ဆွဲရွှေ့သောအခါ
+    viewport.addEventListener('mousemove', (e) => {
+        if (!isDown) return; // မဖိထားရင် အလုပ်မလုပ်ပါ
+        e.preventDefault();
+        
+        const x = e.pageX - viewport.offsetLeft;
+        const y = e.pageY - viewport.offsetTop;
+        
+        // ရွှေ့မည့် အကွာအဝေး (1.5 က အမြန်နှုန်းဖြစ်ပြီး လိုသလို ပြင်နိုင်သည်)
+        const walkX = (x - startX) * 1.5; 
+        const walkY = (y - startY) * 1.5;
+        
+        // Scroll ကို လိုက်ရွှေ့ပေးခြင်း
+        viewport.scrollLeft = scrollLeft - walkX;
+        viewport.scrollTop = scrollTop - walkY;
+    });
+});
+
 // 5. Main App Logic
 // ==========================================
 const app = {
@@ -404,6 +455,7 @@ const app = {
 
 // Start the Application
 window.addEventListener('DOMContentLoaded', () => auth.init());
+
 
 
 
